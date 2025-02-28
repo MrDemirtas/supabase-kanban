@@ -1,9 +1,14 @@
-import "./Login.css";
+import { useContext, useState } from "react";
 
+import { DataContext } from "../App";
 import { supabase } from "../../supabaseClient";
-import { useState } from "react";
 
 const Login = () => {
+  const { sessionRef } = useContext(DataContext);
+  if (sessionRef.current) {
+    location.hash = "/";
+    return;
+  }
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
   const [isCodeSent, setIsCodeSent] = useState(false);
@@ -12,8 +17,11 @@ const Login = () => {
     const { data, error } = await supabase.auth.signInWithOtp({
       email,
     });
-    console.log(data, error);
-    setIsCodeSent(true);
+    if (!error) {
+      setIsCodeSent(true);
+    } else {
+      alert("Kod gönderilemedi. Lütfen e-posta adresinizi kontrol edin.");
+    }
   };
 
   const handleLogin = async () => {

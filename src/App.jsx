@@ -1,15 +1,21 @@
-import { createContext, useEffect, useState } from "react";
+import { createContext, useEffect, useRef, useState } from "react";
 
-import Login from "./components/Login";
+import { getPage } from "./helper";
 import { supabase } from "../supabaseClient";
 
+export const DataContext = createContext(null);
 const App = () => {
+  const sessionRef = useRef(null);
+  const [route, setRoute] = useState(location.hash.substring(1) || "/");
   const [user, setUser] = useState(null);
+  const [tasks, setTasks] = useState([]);
+  const [boards, setBoards] = useState([]);
 
   useEffect(() => {
     const { data } = supabase.auth.onAuthStateChange((event, session) => {
+      sessionRef.current = session;
       if (event === "INITIAL_SESSION") {
-        // handle initial session
+        location.hash = session ? "/" : "/login";
       } else if (event === "SIGNED_IN") {
         const userCheck = async () => {
           const { data, error } = await supabase
@@ -31,9 +37,10 @@ const App = () => {
           }
         };
         userCheck();
+        location.hash = "/";
       } else if (event === "SIGNED_OUT") {
+        location.hash = "/login";
         setUser(null);
-        // handle sign out event
       } else if (event === "PASSWORD_RECOVERY") {
         // handle password recovery event
       } else if (event === "TOKEN_REFRESHED") {
@@ -43,16 +50,29 @@ const App = () => {
       }
     });
 
+    window.addEventListener("hashchange", () => {
+      setRoute(location.hash.substring(1));
+    });
+
     return () => {
       data.subscription.unsubscribe();
     };
   }, []);
 
   return (
-    <>
-      <button onClick={() => supabase.auth.signOut()}>Çıkış {user}</button>
-      <Login />
-    </>
+    <DataContext.Provider
+      value={{
+        user,
+        setUser,
+        tasks,
+        setTasks,
+        boards,
+        setBoards,
+        sessionRef,
+      }}
+    >
+      {getPage(route)}
+    </DataContext.Provider>
   );
 };
 
