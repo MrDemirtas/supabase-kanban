@@ -6,10 +6,34 @@ import { supabase } from "../supabaseClient";
 export const DataContext = createContext(null);
 const App = () => {
   const sessionRef = useRef(null);
-  const [route, setRoute] = useState(location.hash.substring(1) || "/");
+  const [route, setRoute] = useState(location.hash.substring(1) || "/login");
   const [user, setUser] = useState(null);
-  const [tasks, setTasks] = useState([]);
-  const [boards, setBoards] = useState([]);
+  const [taskData, setTaskData] = useState([]);
+  const [selectedBoard, setSelectedBoard] = useState(null);
+
+  useEffect(() => {
+    !selectedBoard && setSelectedBoard(taskData[0]);
+  }, [taskData]);
+
+  const userCheck = async () => {
+    const { data, error } = await supabase
+      .from("users")
+      .select("name")
+      .eq("id", sessionRef.current.user.id)
+      .single();
+    if (data.length === 0) {
+      const name = prompt("YENİ KAYIT!\n\nAdınızı girin:");
+      const { data, error } = await supabase
+        .from("users")
+        .insert({ id: sessionRef.current.user.id, name })
+        .select("name")
+        .eq("id", sessionRef.current.user.id)
+        .single();
+      setUser(data.name);
+    } else {
+      setUser(data.name);
+    }
+  };
 
   useEffect(() => {
     const { data } = supabase.auth.onAuthStateChange((event, session) => {
@@ -17,26 +41,11 @@ const App = () => {
       if (event === "INITIAL_SESSION") {
         location.hash = session ? "/" : "/login";
       } else if (event === "SIGNED_IN") {
-        const userCheck = async () => {
-          const { data, error } = await supabase
-            .from("users")
-            .select("name")
-            .eq("id", session.user.id)
-            .single();
-          if (data.length === 0) {
-            const name = prompt("YENİ KAYIT!\n\nAdınızı girin:");
-            const { data, error } = await supabase
-              .from("users")
-              .insert({ id: session.user.id, name })
-              .select("name")
-              .eq("id", session.user.id)
-              .single();
-            setUser(data.name);
-          } else {
-            setUser(data.name);
-          }
-        };
         userCheck();
+        supabase
+          .from("boards")
+          .select("*, categories(*, tasks(*))")
+          .then(({ data }) => setTaskData(data));
         location.hash = "/";
       } else if (event === "SIGNED_OUT") {
         location.hash = "/login";
@@ -64,14 +73,14 @@ const App = () => {
       value={{
         user,
         setUser,
-        tasks,
-        setTasks,
-        boards,
-        setBoards,
+        taskData,
+        setTaskData,
+        selectedBoard,
+        setSelectedBoard,
         sessionRef,
       }}
     >
-      {getPage(route)}
+      {selectedBoard && getPage(route)}
     </DataContext.Provider>
   );
 };

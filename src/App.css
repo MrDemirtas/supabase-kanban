@@ -1,4 +1,4 @@
-html{
+html {
   overflow-y: hidden;
 }
 
@@ -84,9 +84,10 @@ header {
 }
 
 main {
+  display: flex;
   height: calc(100vh - 64px);
-  width: min-content;
-  overflow-x: auto;
+  width: 100%;
+  overflow: auto;
   padding: 24px 16px;
 }
 
@@ -97,6 +98,10 @@ main {
 }
 
 .column-item {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+
   h4 {
     display: flex;
     align-items: center;
@@ -110,34 +115,34 @@ main {
   h4::before {
     content: "";
     display: inline-block;
-    width: 8px;
-    height: 8px;
+    width: 16px;
+    height: 16px;
     border-radius: 50%;
     margin-right: 8px;
   }
 }
 
-.column-group:nth-child(1) h4::before {
+.column-item:nth-child(1) h4::before {
   background-color: #49c4e5;
 }
 
-.column-group:nth-child(2) h4::before {
+.column-item:nth-child(2) h4::before {
   background-color: #8471f2;
 }
 
-.column-group:nth-child(3) h4::before {
+.column-item:nth-child(3) h4::before {
   background-color: #67e2ae;
 }
 
-.column-group:nth-child(4) h4::before {
+.column-item:nth-child(4) h4::before {
   background-color: #e5a449;
 }
 
-.column-group:nth-child(5) h4::before {
+.column-item:nth-child(5) h4::before {
   background-color: #2a3fdb;
 }
 
-.column-group:nth-child(6) h4::before {
+.column-item:nth-child(6) h4::before {
   background-color: #c36e6e;
 }
 
@@ -151,4 +156,21 @@ main {
   border-radius: 8px;
   box-shadow: 0px 4px 6px 0px #364e7e1a;
   padding: 24px 16px;
+  cursor: pointer;
+  display: grid;
+  gap: 8px;
+
+  h5 {
+    font-weight: 700;
+    font-size: 15px;
+    line-height: 18.9px;
+    color: #000112;
+  }
+
+  p {
+    font-weight: 700;
+    font-size: 12px;
+    line-height: 15.12px;
+    color: #828fa3;
+  }
 }
