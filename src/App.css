@@ -72,6 +72,10 @@ header {
     align-items: center;
     background-color: transparent;
     border: none;
+    &:last-child {
+      width: 32px;
+      height: 32px;
+    }
   }
 
   .header-newTaskBtn {
@@ -210,7 +214,7 @@ dialog {
     line-height: 22.68px;
     color: #000112;
   }
-  button{
+  button {
     width: 32px;
     height: 32px;
     background-color: transparent;
@@ -270,5 +274,86 @@ dialog {
     font-size: 13px;
     line-height: 23px;
     color: #000112;
+  }
+}
+
+.column-item-add {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(180deg, #e9effa 0%, rgba(233, 239, 250, 0.5) 100%);
+  cursor: pointer;
+  border-radius: 6px;
+  h1 {
+    font-size: 24px;
+    line-height: 30.24px;
+    color: #828fa3;
+  }
+}
+
+.dialog-add-column-container {
+  padding: 24px;
+  display: grid;
+  gap: 24px;
+  > label {
+    display: grid;
+    gap: 8px;
+    font-weight: 700;
+    font-size: 12px;
+    line-height: 15.12px;
+    color: #828fa3;
+    input {
+      padding: 8px 16px;
+      font-weight: 500;
+      font-size: 13px;
+      line-height: 23px;
+      color: #000112;
+      border-radius: 1px;
+      border: 1px solid #828fa340;
+    }
+  }
+  > button {
+    padding: 8px;
+    font-family: Plus Jakarta Sans;
+    font-size: 13px;
+    line-height: 23px;
+    color: #fff;
+    border-radius: 20px;
+    border: none;
+    background-color: #635FC7;
+  }
+}
+
+.dialog-add-column-list {
+  display: grid;
+  gap: 8px;
+  > label {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    input {
+      width: 100%;
+      padding: 8px 16px;
+      font-weight: 500;
+      font-size: 13px;
+      line-height: 23px;
+      color: #000112;
+      border-radius: 1px;
+      border: 1px solid #828fa340;
+    }
+    button {
+      background-color: transparent;
+      border: none;
+    }
+  }
+  > button {
+    font-weight: 700;
+    font-size: 13px;
+    line-height: 23px;
+    color: #635fc7;
+    background: #635fc71a;
+    padding: 8px;
+    border: none;
+    border-radius: 20px;
   }
 }

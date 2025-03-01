@@ -1,5 +1,6 @@
 import { useContext, useEffect, useRef, useState } from "react";
 
+import AddColumnModal from "./AddColumnModal";
 import { DataContext } from "../App";
 import dropdownArrowSvg from "/images/dropdown-arrow.svg";
 import logoSvg from "/images/logo.svg";
@@ -8,11 +9,18 @@ import { supabase } from "../../supabaseClient";
 import threeDotSvg from "/images/three-dot.svg";
 
 const Main = () => {
+  const addNewColumnRef = useRef(null);
   const { sessionRef, selectedBoard } = useContext(DataContext);
   if (!sessionRef.current) {
     location.hash = "/login";
     return;
   }
+
+  const columnGroupStyle = {
+    gridTemplateColumns: `repeat(${
+      selectedBoard.categories.length + (selectedBoard.categories.length !== 6 ? 1 : 0)
+    }, ${selectedBoard.categories.length > 0 ? "280px" : "100%"})`,
+  };
 
   return (
     <>
@@ -33,12 +41,18 @@ const Main = () => {
         </div>
       </header>
       <main>
-        <div className="column-group">
+        <div className="column-group" style={columnGroupStyle}>
           {selectedBoard.categories.map((category) => (
             <ColumnItem key={category.id} category={category} />
           ))}
+          {selectedBoard.categories.length !== 6 && (
+            <div className="column-item column-item-add" onClick={() => addNewColumnRef.current.showModal()}>
+              <h1>+ Add Column</h1>
+            </div>
+          )}
         </div>
       </main>
+      <AddColumnModal addNewColumnRef={addNewColumnRef} />
     </>
   );
 };
