@@ -135,7 +135,7 @@ const SubtaskItem = ({ subtask, done, subtasks, taskId, categoryId }) => {
     const thisCategory = selectedBoard.categories.find((x) => x.id === categoryId);
     thisCategory.tasks.find((x) => x.id === taskId).subtasks = subtasks;
 
-    const { error } = await supabase.from("tasks").update({ subtasks }).eq("id", taskId);
+    const { error } = await supabase.from("tasks").update({ subtasks, updated_at: new Date() }).eq("id", taskId);
 
     if (error) {
       alert("An error occurred while updating the subtask.");
