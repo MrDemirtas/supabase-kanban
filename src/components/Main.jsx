@@ -1,13 +1,14 @@
+import { useContext, useEffect, useRef, useState } from "react";
+
 import { DataContext } from "../App";
 import dropdownArrowSvg from "/images/dropdown-arrow.svg";
 import logoSvg from "/images/logo.svg";
 import plusSvg from "/images/plus.svg";
+import { supabase } from "../../supabaseClient";
 import threeDotSvg from "/images/three-dot.svg";
-import { useContext } from "react";
 
 const Main = () => {
-  const { sessionRef, selectedBoard, setSelectedBoard } =
-    useContext(DataContext);
+  const { sessionRef, selectedBoard } = useContext(DataContext);
   if (!sessionRef.current) {
     location.hash = "/login";
     return;
@@ -43,8 +44,6 @@ const Main = () => {
 };
 
 const ColumnItem = ({ category }) => {
-  console.log(category);
-
   return (
     <div className="column-item">
       <h4>
@@ -59,14 +58,106 @@ const ColumnItem = ({ category }) => {
   );
 };
 
-const CardItem = ({ task, subtasks }) => {
+const CardItem = ({ id, task, subtasks, description, category_id }) => {
+  const { selectedBoard, taskData, setTaskData } = useContext(DataContext);
+  const dialogRef = useRef(null);
+  const thisSubtasksRef = useRef(subtasks);
+
+  const handleStatusChange = async (e) => {
+    console.log(e.target.value);
+    const thisCategory = selectedBoard.categories.find((x) => x.id === category_id);
+    thisCategory.tasks = thisCategory.tasks.filter((x) => x.id !== id);
+
+    const newCategory = selectedBoard.categories.find((x) => x.name === e.target.value);
+    const { data, error } = await supabase
+      .from("tasks")
+      .update({ category_id: newCategory.id, updated_at: new Date() })
+      .eq("id", id)
+      .select();
+
+    if (error) {
+      alert("An error occurred while updating the task.");
+      return;
+    }
+    newCategory.tasks.push(data[0]);
+    setTaskData([...taskData]);
+  };
+
   return (
-    <div className="column-item-card">
-      <h5>{task}</h5>
-      <p>
-        {subtasks?.filter((x) => x.done).length || "0"} of {subtasks?.length || "0"} substasks
-      </p>
-    </div>
+    <>
+      <div className="column-item-card" onClick={() => dialogRef.current.showModal()}>
+        <h5>{task}</h5>
+        <p>
+          {subtasks?.filter((x) => x.done).length || "0"} of {subtasks?.length || "0"} substasks
+        </p>
+      </div>
+      <dialog ref={dialogRef}>
+        <div className="dialog-container">
+          <div className="dialog-top">
+            <h3>{task}</h3>
+            <button onClick={() => dialogRef.current.close()}>X</button>
+          </div>
+          <p>{description}</p>
+          <div className="dialog-subtasks-content">
+            <h3>
+              Subtasks ({subtasks?.filter((x) => x.done).length || "0"} of {subtasks?.length || "0"})
+            </h3>
+
+            <ul>
+              {subtasks?.map((subtask, i) => (
+                <SubtaskItem
+                  key={i}
+                  {...subtask}
+                  thisSubtasksRef={thisSubtasksRef}
+                  taskId={id}
+                  categoryId={category_id}
+                />
+              ))}
+            </ul>
+          </div>
+
+          <div className="dialog-current-status">
+            <h3>Current Status</h3>
+            <select
+              onChange={handleStatusChange}
+              value={selectedBoard.categories.find((x) => x.id === category_id).name}
+            >
+              {selectedBoard.categories.map((category) => (
+                <option key={category.id}>{category.name}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+      </dialog>
+    </>
+  );
+};
+
+const SubtaskItem = ({ subtask, done, thisSubtasksRef, taskId, categoryId }) => {
+  const { selectedBoard, taskData, setTaskData } = useContext(DataContext);
+
+  const handleSubtaskChange = async () => {
+    const thisSubtask = thisSubtasksRef.current.find((x) => x.subtask === subtask);
+    thisSubtask.done = !done;
+    const thisCategory = selectedBoard.categories.find((x) => x.id === categoryId);
+    thisCategory.tasks.find((x) => x.id === taskId).subtasks = thisSubtasksRef.current;
+
+    const { error } = await supabase.from("tasks").update({ subtasks: thisSubtasksRef.current }).eq("id", taskId);
+
+    if (error) {
+      alert("An error occurred while updating the subtask.");
+      return;
+    }
+    setTaskData([...taskData]);
+  };
+
+  return (
+    <li>
+      <label>
+        <input type="checkbox" checked={done} onChange={handleSubtaskChange} />
+        {subtask}
+      </label>
+    </li>
   );
 };
 

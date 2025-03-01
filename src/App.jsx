@@ -5,6 +5,7 @@ import { supabase } from "../supabaseClient";
 
 export const DataContext = createContext(null);
 const App = () => {
+  const isFirstLogin = useRef(true);
   const sessionRef = useRef(null);
   const [route, setRoute] = useState(location.hash.substring(1) || "/login");
   const [user, setUser] = useState(null);
@@ -40,7 +41,8 @@ const App = () => {
       sessionRef.current = session;
       if (event === "INITIAL_SESSION") {
         location.hash = session ? "/" : "/login";
-      } else if (event === "SIGNED_IN") {
+      } else if (event === "SIGNED_IN" && isFirstLogin.current) {
+        isFirstLogin.current = false;
         userCheck();
         supabase
           .from("boards")
@@ -48,6 +50,7 @@ const App = () => {
           .then(({ data }) => setTaskData(data));
         location.hash = "/";
       } else if (event === "SIGNED_OUT") {
+        isFirstLogin.current = true;
         location.hash = "/login";
         setUser(null);
       } else if (event === "PASSWORD_RECOVERY") {
