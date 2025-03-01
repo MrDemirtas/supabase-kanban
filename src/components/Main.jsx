@@ -61,10 +61,8 @@ const ColumnItem = ({ category }) => {
 const CardItem = ({ id, task, subtasks, description, category_id }) => {
   const { selectedBoard, taskData, setTaskData } = useContext(DataContext);
   const dialogRef = useRef(null);
-  const thisSubtasksRef = useRef(subtasks);
 
   const handleStatusChange = async (e) => {
-    console.log(e.target.value);
     const thisCategory = selectedBoard.categories.find((x) => x.id === category_id);
     thisCategory.tasks = thisCategory.tasks.filter((x) => x.id !== id);
 
@@ -73,13 +71,14 @@ const CardItem = ({ id, task, subtasks, description, category_id }) => {
       .from("tasks")
       .update({ category_id: newCategory.id, updated_at: new Date() })
       .eq("id", id)
-      .select();
+      .select()
+      .single();
 
     if (error) {
       alert("An error occurred while updating the task.");
       return;
     }
-    newCategory.tasks.push(data[0]);
+    newCategory.tasks.push(data);
     setTaskData([...taskData]);
   };
 
@@ -105,13 +104,7 @@ const CardItem = ({ id, task, subtasks, description, category_id }) => {
 
             <ul>
               {subtasks?.map((subtask, i) => (
-                <SubtaskItem
-                  key={i}
-                  {...subtask}
-                  thisSubtasksRef={thisSubtasksRef}
-                  taskId={id}
-                  categoryId={category_id}
-                />
+                <SubtaskItem key={i} {...subtask} subtasks={subtasks} taskId={id} categoryId={category_id} />
               ))}
             </ul>
           </div>
@@ -133,16 +126,16 @@ const CardItem = ({ id, task, subtasks, description, category_id }) => {
   );
 };
 
-const SubtaskItem = ({ subtask, done, thisSubtasksRef, taskId, categoryId }) => {
+const SubtaskItem = ({ subtask, done, subtasks, taskId, categoryId }) => {
   const { selectedBoard, taskData, setTaskData } = useContext(DataContext);
 
   const handleSubtaskChange = async () => {
-    const thisSubtask = thisSubtasksRef.current.find((x) => x.subtask === subtask);
+    const thisSubtask = subtasks.find((x) => x.subtask === subtask);
     thisSubtask.done = !done;
     const thisCategory = selectedBoard.categories.find((x) => x.id === categoryId);
-    thisCategory.tasks.find((x) => x.id === taskId).subtasks = thisSubtasksRef.current;
+    thisCategory.tasks.find((x) => x.id === taskId).subtasks = subtasks;
 
-    const { error } = await supabase.from("tasks").update({ subtasks: thisSubtasksRef.current }).eq("id", taskId);
+    const { error } = await supabase.from("tasks").update({ subtasks }).eq("id", taskId);
 
     if (error) {
       alert("An error occurred while updating the subtask.");
