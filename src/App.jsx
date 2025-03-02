@@ -1,27 +1,23 @@
 import { createContext, useEffect, useRef, useState } from "react";
 
-import { getPage } from "./helper";
+import Login from "./components/Login";
+import Main from "./components/Main";
 import { supabase } from "../supabaseClient";
 
 export const DataContext = createContext(null);
 const App = () => {
   const isFirstLogin = useRef(true);
   const sessionRef = useRef(null);
-  const [route, setRoute] = useState(location.hash.substring(1) || "/login");
   const [user, setUser] = useState(null);
   const [taskData, setTaskData] = useState([]);
   const [selectedBoard, setSelectedBoard] = useState(null);
 
   useEffect(() => {
-    !selectedBoard && setSelectedBoard(taskData[0]);
+    setSelectedBoard(taskData[0]);
   }, [taskData]);
 
   const userCheck = async () => {
-    const { data, error } = await supabase
-      .from("users")
-      .select("name")
-      .eq("id", sessionRef.current.user.id)
-      .single();
+    const { data, error } = await supabase.from("users").select("name").eq("id", sessionRef.current.user.id).single();
     if (data.length === 0) {
       const name = prompt("YENİ KAYIT!\n\nAdınızı girin:");
       const { data, error } = await supabase
@@ -47,7 +43,9 @@ const App = () => {
         supabase
           .from("boards")
           .select("*, categories(*, tasks(*))")
-          .then(({ data }) => setTaskData(data));
+          .then(({ data }) => {
+            setTaskData(data);
+          });
         location.hash = "/";
       } else if (event === "SIGNED_OUT") {
         isFirstLogin.current = true;
@@ -60,10 +58,6 @@ const App = () => {
       } else if (event === "USER_UPDATED") {
         // handle user updated event
       }
-    });
-
-    window.addEventListener("hashchange", () => {
-      setRoute(location.hash.substring(1));
     });
 
     return () => {
@@ -83,7 +77,7 @@ const App = () => {
         sessionRef,
       }}
     >
-      {selectedBoard && getPage(route)}
+      {sessionRef.current ? selectedBoard && <Main /> : <Login />}
     </DataContext.Provider>
   );
 };

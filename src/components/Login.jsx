@@ -1,14 +1,7 @@
-import { useContext, useState } from "react";
-
-import { DataContext } from "../App";
 import { supabase } from "../../supabaseClient";
+import { useState } from "react";
 
 const Login = () => {
-  const { sessionRef } = useContext(DataContext);
-  if (sessionRef.current) {
-    location.hash = "/";
-    return;
-  }
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
   const [isCodeSent, setIsCodeSent] = useState(false);
@@ -38,22 +31,12 @@ const Login = () => {
       <h2>Giriş Yap</h2>
       {!isCodeSent ? (
         <div>
-          <input
-            type="email"
-            placeholder="E-posta"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
+          <input type="email" placeholder="E-posta" value={email} onChange={(e) => setEmail(e.target.value)} />
           <button onClick={handleSendCode}>Kodu Gönder</button>
         </div>
       ) : (
         <div>
-          <input
-            type="text"
-            placeholder="Kod"
-            value={code}
-            onChange={(e) => setCode(e.target.value)}
-          />
+          <input type="text" placeholder="Kod" value={code} onChange={(e) => setCode(e.target.value)} />
           <button onClick={handleLogin}>Giriş Yap</button>
         </div>
       )}

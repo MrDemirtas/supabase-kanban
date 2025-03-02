@@ -4,7 +4,7 @@ import { DataContext } from "../App";
 import { supabase } from "../../supabaseClient";
 
 const AddColumnModal = ({ addNewColumnRef }) => {
-  const { selectedBoard, taskData } = useContext(DataContext);
+  const { selectedBoard, taskData, setTaskData } = useContext(DataContext);
   const [columns, setColumns] = useState([]);
   const [deletedColumnsId, setDeletedColumnsId] = useState([]);
 
@@ -64,12 +64,19 @@ const AddColumnModal = ({ addNewColumnRef }) => {
     }
 
     if (deletedColumnsId.length > 0) {
-      const { error: deleteError } = await supabase.from("categories").delete().in("id", deletedColumnsId);
+      const { error } = await supabase.from("categories").delete().in("id", deletedColumnsId);
 
-      if (deleteError) {
+      if (error) {
         console.error("Delete error:", deleteError);
       }
     }
+
+    supabase
+      .from("boards")
+      .select("*, categories(*, tasks(*))")
+      .then(({ data }) => {
+        setTaskData(data);
+      });
 
     addNewColumnRef.current?.close();
   };

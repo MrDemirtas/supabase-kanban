@@ -10,11 +10,7 @@ import threeDotSvg from "/images/three-dot.svg";
 
 const Main = () => {
   const addNewColumnRef = useRef(null);
-  const { sessionRef, selectedBoard } = useContext(DataContext);
-  if (!sessionRef.current) {
-    location.hash = "/login";
-    return;
-  }
+  const { selectedBoard } = useContext(DataContext);
 
   const columnGroupStyle = {
     gridTemplateColumns: `repeat(${
